@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "roughjs": "^2.2.5",
+    "typescript": "^3.0.1"
+  }
+}
