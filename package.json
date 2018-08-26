@@ -1,6 +1,14 @@
 {
   "dependencies": {
     "roughjs": "^2.2.5",
+    "webfontloader": "^1.6.28"
+  },
+  "devDependencies": {
+    "@types/webfontloader": "^1.6.29",
+    "parcel": "^1.9.7",
+    "prettier": "^1.14.2",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
     "typescript": "^3.0.1"
   }
 }
