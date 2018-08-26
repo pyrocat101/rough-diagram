@@ -2,26 +2,25 @@ import rough from 'roughjs';
 
 type RoughCanvas = ReturnType<typeof rough.canvas>;
 
-const CELL_SIZE = 5;
+const CELL_SIZE = 20;
 const X = (x: number) => x * CELL_SIZE + CELL_SIZE / 2;
 const Y = (y: number) => y * CELL_SIZE + CELL_SIZE / 2;
 
-type LineEnd = 'arrow' | 'circle';
+type Point = [number, number];
+type LineEndStyle = 'arrow' | 'circle';
 
 interface Figure {
   draw(rc: RoughCanvas, ctx: CanvasRenderingContext2D): any;
 }
 
-type Point = [number, number];
-
 class Line {
   constructor(
     public x0: number,
     public y0: number,
-    readonly start: LineEnd | null,
+    readonly start: LineEndStyle | null,
     public x1: number,
     public y1: number,
-    readonly end: LineEnd | null,
+    readonly end: LineEndStyle | null,
     readonly color: string
   ) {}
 
@@ -29,7 +28,9 @@ class Line {
     // TODO
     rc.line(X(this.x0), Y(this.y0), X(this.x1), Y(this.y1), {
       fill: this.color,
+      roughness: 1.5,
       stroke: this.color,
+      strokeWidth: 2,
     });
     this.ending(rc, this.start, X(this.x1), Y(this.y1), X(this.x0), Y(this.y0));
     this.ending(rc, this.end, X(this.x0), Y(this.y0), X(this.x1), Y(this.y1));
@@ -37,7 +38,7 @@ class Line {
 
   private ending(
     rc: RoughCanvas,
-    type: LineEnd | null,
+    type: LineEndStyle | null,
     x0: number,
     y0: number,
     x1: number,
@@ -46,8 +47,9 @@ class Line {
     switch (type) {
       case 'circle':
         // TODO: define roughness option
-        rc.circle(x0, y0, 10, {
+        rc.circle(x1, y1, 10, {
           fill: this.color,
+          fillWeight: 3,
         });
         break;
       case 'arrow':
@@ -77,7 +79,12 @@ class Line {
     const x4 = x1 + l4 * Math.cos(alpha4);
     const y4 = y1 + l4 * Math.sin(alpha4);
 
-    rc.linearPath([[x3, y3], [x1, y1], [x4, y4]]);
+    rc.linearPath([[x3, y3], [x1, y1], [x4, y4]], {
+      bowing: 1,
+      fill: this.color,
+      stroke: this.color,
+      strokeWidth: 2,
+    });
   }
 }
 
@@ -121,6 +128,121 @@ function parseASCIIArt(source: string) {
     }
   }
 
+  // Converts line's character to the direction of line's growth.
+  const dir: {[name: string]: Point} = {'-': [1, 0], '|': [0, 1]};
+
+  const figures: Figure[] = []; // List of extracted figures.
+
+  while (extractLine()) {
+    continue;
+  } // Extract all lines.
+  extractText(); // Extract all text.
+
+  return figures;
+
+  // Extract a single line and erase it from the ascii art matrix.
+  function extractLine() {
+    const ch = findLineChar();
+    if (ch == null) {
+      return false;
+    }
+    let [x0, y0] = ch;
+
+    const d = dir[data[y0][x0]];
+
+    // Find line's start by advancing in the oposite direction.
+    let color: string | undefined;
+    while (isPartOfLine(x0 - d[0], y0 - d[1])) {
+      x0 -= d[0];
+      y0 -= d[1];
+      if (color == null) {
+        color = toColor(x0, y0);
+      }
+    }
+
+    let start: LineEndStyle | null = null;
+    if (isLineEnding(x0 - d[0], y0 - d[1])) {
+      // Line has a decorated start. Extract is as well.
+      x0 -= d[0];
+      y0 -= d[1];
+      start = data[y0][x0] === '*' ? 'circle' : 'arrow';
+    }
+
+    // Find line's end by advancing forward in the given direction.
+    let [x1, y1] = ch;
+    while (isPartOfLine(x1 + d[0], y1 + d[1])) {
+      x1 += d[0];
+      y1 += d[1];
+      if (color == null) {
+        color = toColor(x1, y1);
+      }
+    }
+
+    let end: LineEndStyle | null = null;
+    if (isLineEnding(x1 + d[0], y1 + d[1])) {
+      // Line has a decorated end. Extract it.
+      x1 += d[0];
+      y1 += d[1];
+      end = data[y1][x1] === '*' ? 'circle' : 'arrow';
+    }
+
+    // Create line object and erase line from the ascii art matrix.
+    const line = new Line(x0, y0, start, x1, y1, end, color == null ? 'black' : color);
+    figures.push(line);
+    erase(line);
+
+    // Adjust line start and end to accomodate for arrow endings.
+    // Those should not intersect with their targets but should touch them
+    // instead. Should be done after erasure to ensure that erase deletes
+    // arrowheads.
+    if (start === 'arrow') {
+      line.x0 -= d[0];
+      line.y0 -= d[1];
+    }
+
+    if (end === 'arrow') {
+      line.x1 += d[0];
+      line.y1 += d[1];
+    }
+
+    return true;
+  }
+
+  // Extract all non space characters that were left after line extraction
+  // as text objects.
+  function extractText() {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        if (data[y][x] !== ' ') {
+          // Find the end of the text annotation by searching for a space.
+          const start = x;
+          let end = x;
+          while (end < width && data[y][end] !== ' ') {
+            end++;
+          }
+
+          let text = data[y].slice(start, end).join('');
+
+          // Check if it can be concatenated with a previously found text annotation.
+          const prev = figures[figures.length - 1];
+          if (prev instanceof Text && prev.x0 + prev.text.length + 1 === start) {
+            // If they touch concatentate them.
+            prev.text = `${prev.text} ${text}`;
+          } else {
+            // Look for a grey color modifiers.
+            let color = 'black';
+            if (text[0] === '\\' && text[text.length - 1] === '\\') {
+              text = text.substring(1, text.length - 1);
+              color = '#666';
+            }
+            figures.push(new Text(x, y, text, color));
+          }
+          x = end;
+        }
+      }
+    }
+  }
+
   // Returns true iff the character can be part of the line.
   function isPartOfLine(x: number, y: number) {
     const c = at(y, x);
@@ -154,9 +276,6 @@ function parseASCIIArt(source: string) {
     }
     return;
   }
-
-  // Converts line's character to the direction of line's growth.
-  const dir: {[name: string]: Point} = {'-': [1, 0], '|': [0, 1]};
 
   // Erases character that belongs to the extracted line.
   function eraseChar(x: number, y: number, dx: number, dy: number) {
@@ -227,122 +346,11 @@ function parseASCIIArt(source: string) {
       eraseChar(line.x0, line.y0, dx, dy);
     }
   }
-
-  const figures: Figure[] = []; // List of extracted figures.
-
-  // Extract a single line and erase it from the ascii art matrix.
-  function extractLine() {
-    const ch = findLineChar();
-    if (ch == null) {
-      return false;
-    }
-    let [x0, y0] = ch;
-
-    const d = dir[data[y0][x0]];
-
-    // Find line's start by advancing in the oposite direction.
-    let color: string | undefined;
-    while (isPartOfLine(x0 - d[0], y0 - d[1])) {
-      x0 -= d[0];
-      y0 -= d[1];
-      if (color == null) {
-        color = toColor(x0, y0);
-      }
-    }
-
-    let start: LineEnd | null = null;
-    if (isLineEnding(x0 - d[0], y0 - d[1])) {
-      // Line has a decorated start. Extract is as well.
-      x0 -= d[0];
-      y0 -= d[1];
-      start = data[y0][x0] === '*' ? 'circle' : 'arrow';
-    }
-
-    // Find line's end by advancing forward in the given direction.
-    let [x1, y1] = ch;
-    while (isPartOfLine(x1 + d[0], y1 + d[1])) {
-      x1 += d[0];
-      y1 += d[1];
-      if (color == null) {
-        color = toColor(x1, y1);
-      }
-    }
-
-    let end: LineEnd | null = null;
-    if (isLineEnding(x1 + d[0], y1 + d[1])) {
-      // Line has a decorated end. Extract it.
-      x1 += d[0];
-      y1 += d[1];
-      end = data[y1][x1] === '*' ? 'circle' : 'arrow';
-    }
-
-    // Create line object and erase line from the ascii art matrix.
-    const line = new Line(x0, y0, start, x1, y1, end, color == null ? 'black' : color);
-    figures.push(line);
-    erase(line);
-
-    // Adjust line start and end to accomodate for arrow endings.
-    // Those should not intersect with their targets but should touch them
-    // instead. Should be done after erasure to ensure that erase deletes
-    // arrowheads.
-    if (start === 'arrow') {
-      line.x0 -= d[0];
-      line.y0 -= d[1];
-    }
-
-    if (end === 'arrow') {
-      line.x1 += d[0];
-      line.y1 += d[1];
-    }
-
-    return true;
-  }
-
-  // Extract all non space characters that were left after line extraction
-  // as text objects.
-  function extractText() {
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        if (data[y][x] !== ' ') {
-          // Find the end of the text annotation by searching for a space.
-          const start = x;
-          let end = x;
-          while (end < width && data[y][end] !== ' ') {
-            end++;
-          }
-
-          let text = data[y].slice(start, end).join('');
-
-          // Check if it can be concatenated with a previously found text annotation.
-          const prev = figures[figures.length - 1];
-          if (prev instanceof Text && prev.x0 + prev.text.length + 1 === start) {
-            // If they touch concatentate them.
-            prev.text = '${prev.text} $text';
-          } else {
-            // Look for a grey color modifiers.
-            let color = 'black';
-            if (text[0] === '\\' && text[text.length - 1] === '\\') {
-              text = text.substring(1, text.length - 1);
-              color = '#666';
-            }
-            figures.push(new Text(x, y, text, color));
-          }
-          x = end;
-        }
-      }
-    }
-  }
-
-  while (extractLine()) {
-    continue;
-  } // Extract all lines.
-  extractText(); // Extract all text.
-
-  return figures;
 }
 
 export function drawDiagram(source: string, rc: RoughCanvas, canvas: HTMLCanvasElement): void {
   const ctx = canvas.getContext('2d')!;
+
   const figures = parseASCIIArt(source);
 
   let width = 0;
@@ -354,10 +362,15 @@ export function drawDiagram(source: string, rc: RoughCanvas, canvas: HTMLCanvasE
     }
   }
 
-  canvas.style.width = String(width);
-  canvas.style.height = String(height);
-  canvas.width = width * window.devicePixelRatio;
-  canvas.height = width * window.devicePixelRatio;
+  const dpr = window.devicePixelRatio;
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  ctx.scale(dpr, dpr);
+
+  ctx.textBaseline = 'middle';
+  ctx.font = `20pt 'Gloria Hallelujah'`;
 
   for (const figure of figures) {
     figure.draw(rc, ctx);

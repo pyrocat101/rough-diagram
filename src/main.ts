@@ -3,10 +3,10 @@ import WebFont from 'webfontloader';
 import {drawDiagram} from './diagram';
 
 WebFont.load({
+  active: main,
   google: {
     families: ['Gloria Hallelujah'],
   },
-  active: main,
 });
 
 function main() {
