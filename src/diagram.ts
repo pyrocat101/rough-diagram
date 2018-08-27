@@ -368,29 +368,27 @@ export function drawDiagram(
   }
 
   const dpr = window.devicePixelRatio;
+  // 1780 x 1780
   const naturalWidth = width * dpr;
   const naturalHeight = height * dpr;
 
+  // 990 x 813
   const {clientWidth, clientHeight} = canvasContainer;
 
-  let scaleFactor = dpr;
+  let scaleFactor = 1;
   let displayWidth = width;
   let displayHeight = height;
-  if (naturalWidth > clientWidth * dpr || naturalHeight > clientHeight * dpr) {
-    // need downscale by more than dpr
-    scaleFactor = Math.max(naturalWidth / clientWidth, naturalHeight / clientHeight);
-    displayWidth = naturalWidth / scaleFactor;
-    displayHeight = naturalHeight / scaleFactor;
+  if (displayWidth > clientWidth || displayHeight > clientHeight) {
+    // need further downscale
+    scaleFactor = 1 / Math.max(displayWidth / clientWidth, displayHeight / clientHeight);
+    displayWidth *= scaleFactor;
+    displayHeight *= scaleFactor;
   }
   canvas.width = naturalWidth;
   canvas.height = naturalHeight;
   canvas.style.width = `${displayWidth}px`;
   canvas.style.height = `${displayHeight}px`;
-  ctx.scale(2, 2);
-
-  // canvas.style.width = `${width}px`;
-  // canvas.style.height = `${height}px`;
-  // ctx.scale(dpr, dpr);
+  ctx.scale(dpr * scaleFactor, dpr * scaleFactor);
 
   ctx.textBaseline = 'middle';
   ctx.font = `20pt 'Gloria Hallelujah'`;

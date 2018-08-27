@@ -29,7 +29,7 @@ function main() {
   const canvas = document.querySelector<HTMLCanvasElement>('#canvas')!;
   const rc = rough.canvas(canvas);
   const nameInput = document.querySelector<HTMLInputElement>('#name')!;
-  const canvasContainer = document.querySelector('#canvas-container');
+  const canvasContainer = document.querySelector<HTMLElement>('#canvas-container')!;
   const draw = rafThrottle(() => drawDiagram(textarea.value, rc, canvas, canvasContainer));
 
   document.querySelector<HTMLButtonElement>('#save')!.onclick = () => {
