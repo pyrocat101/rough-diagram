@@ -368,11 +368,9 @@ export function drawDiagram(
   }
 
   const dpr = window.devicePixelRatio;
-  // 1780 x 1780
   const naturalWidth = width * dpr;
   const naturalHeight = height * dpr;
 
-  // 990 x 813
   const {clientWidth, clientHeight} = canvasContainer;
 
   let scaleFactor = 1;
