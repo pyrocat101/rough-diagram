@@ -14,7 +14,7 @@ body {
 #textarea {
   font-size: 14px;
   font-family: monospace;
-  white-space: nowrap;
+  white-space: pre;
   overflow: auto;
 }
 

@@ -1,6 +1,7 @@
 {
   "scripts": {
     "build:prod": "rimraf dist && parcel build --public-url ./ src/index.html",
+    "dev": "parcel src/index.html",
     "gh-pages": "/usr/local/bin/git subtree push --prefix dist origin gh-pages"
   },
   "dependencies": {
