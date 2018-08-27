@@ -348,7 +348,12 @@ function parseASCIIArt(source: string) {
   }
 }
 
-export function drawDiagram(source: string, rc: RoughCanvas, canvas: HTMLCanvasElement): void {
+export function drawDiagram(
+  source: string,
+  rc: RoughCanvas,
+  canvas: HTMLCanvasElement,
+  canvasContainer: HTMLElement
+): void {
   const ctx = canvas.getContext('2d')!;
 
   const figures = parseASCIIArt(source);
@@ -363,11 +368,29 @@ export function drawDiagram(source: string, rc: RoughCanvas, canvas: HTMLCanvasE
   }
 
   const dpr = window.devicePixelRatio;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  canvas.width = width * dpr;
-  canvas.height = height * dpr;
-  ctx.scale(dpr, dpr);
+  const naturalWidth = width * dpr;
+  const naturalHeight = height * dpr;
+
+  const {clientWidth, clientHeight} = canvasContainer;
+
+  let scaleFactor = dpr;
+  let displayWidth = width;
+  let displayHeight = height;
+  if (naturalWidth > clientWidth * dpr || naturalHeight > clientHeight * dpr) {
+    // need downscale by more than dpr
+    scaleFactor = Math.max(naturalWidth / clientWidth, naturalHeight / clientHeight);
+    displayWidth = naturalWidth / scaleFactor;
+    displayHeight = naturalHeight / scaleFactor;
+  }
+  canvas.width = naturalWidth;
+  canvas.height = naturalHeight;
+  canvas.style.width = `${displayWidth}px`;
+  canvas.style.height = `${displayHeight}px`;
+  ctx.scale(2, 2);
+
+  // canvas.style.width = `${width}px`;
+  // canvas.style.height = `${height}px`;
+  // ctx.scale(dpr, dpr);
 
   ctx.textBaseline = 'middle';
   ctx.font = `20pt 'Gloria Hallelujah'`;

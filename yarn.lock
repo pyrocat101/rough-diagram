@@ -13,9 +13,26 @@
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.1.tgz#53f349bb986ab273d601175aa1b25a655ab90ee3"
 
+"@polymer/lit-element@^0.5.2":
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/@polymer/lit-element/-/lit-element-0.5.2.tgz#8d4e2d1ada27cf0f1a38b7b0eb9fadae92eb63df"
+  dependencies:
+    "@polymer/polymer" "^3.0.2"
+    lit-html "^0.10.0"
+
+"@polymer/polymer@^3.0.2":
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/@polymer/polymer/-/polymer-3.0.5.tgz#eaa42e70df7de818b5e1839452c82a5f83e39929"
+  dependencies:
+    "@webcomponents/shadycss" "^1.2.0"
+
 "@types/webfontloader@^1.6.29":
   version "1.6.29"
   resolved "https://registry.yarnpkg.com/@types/webfontloader/-/webfontloader-1.6.29.tgz#c6b5f6eb8ca31d0aae6b02b6c1300349dd93ea8e"
+
+"@webcomponents/shadycss@^1.2.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@webcomponents/shadycss/-/shadycss-1.5.0.tgz#109e596027eed04bc5032414c9f094e1aeb9260e"
 
 abbrev@1:
   version "1.1.1"
@@ -2249,6 +2266,10 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
+lit-html@^0.10.0:
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/lit-html/-/lit-html-0.10.2.tgz#53c846afcf91bb1e6623179ef22e327ab8ac0e0e"
+
 lodash.clone@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.clone/-/lodash.clone-4.5.0.tgz#195870450f5a13192478df4bc3d23d2dea1907b6"
@@ -4155,6 +4176,24 @@ wide-align@^1.1.0:
   resolved "https://registry.yarnpkg.com/wide-align/-/wide-align-1.1.3.tgz#ae074e6bdc0c14a431e804e624549c633b000457"
   dependencies:
     string-width "^1.0.2 || 2"
+
+wired-button@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/wired-button/-/wired-button-0.7.0.tgz#66f273e52a4ac5a3d0b5c76121b7deaa6994ca64"
+  dependencies:
+    "@polymer/lit-element" "^0.5.2"
+    wired-lib "^0.6.0"
+
+wired-input@^0.6.6:
+  version "0.6.6"
+  resolved "https://registry.yarnpkg.com/wired-input/-/wired-input-0.6.6.tgz#526a135542f45cc0b0394374f1865b33321a20fa"
+  dependencies:
+    "@polymer/lit-element" "^0.5.2"
+    wired-lib "^0.6.0"
+
+wired-lib@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/wired-lib/-/wired-lib-0.6.0.tgz#89b18cfa3353133e9e33d0cb2ce384668334fc76"
 
 wordwrap@~1.0.0:
   version "1.0.0"

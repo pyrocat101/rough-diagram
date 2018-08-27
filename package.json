@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "roughjs": "^2.2.5",
-    "webfontloader": "^1.6.28"
+    "webfontloader": "^1.6.28",
+    "wired-button": "^0.7.0",
+    "wired-input": "^0.6.6"
   },
   "devDependencies": {
     "@types/webfontloader": "^1.6.29",

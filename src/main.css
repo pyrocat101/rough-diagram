@@ -2,4 +2,32 @@ body {
   font-family: 'Gloria Hallelujah', sans-serif;
   font-size: 16px;
   line-height: 1.2em;
+  display: flex;
+}
+
+#editor {
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+}
+
+#textarea {
+  font-size: 14px;
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: auto;
+}
+
+#actions {
+  margin-top: 8px;
+}
+
+#name {
+  font-family: inherit;
+  height: 30px;
+}
+
+#canvas-container {
+  width: 60%;
+  height: 100vh;
 }
