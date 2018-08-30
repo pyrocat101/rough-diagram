@@ -47,6 +47,6 @@ function main() {
   };
   // Resize canvas to fit into the viewport
   window.addEventListener('resize', draw);
-  document.querySelector<HTMLTextAreaElement>('#textarea')!.onchange = draw;
+  document.querySelector<HTMLTextAreaElement>('#textarea')!.oninput = draw;
   draw();
 }
