@@ -1,4 +1,4 @@
-# [Rough Diagram](https://pyrocat101.github.io/rough-diagram/)
+# [Rough Diagram](https://rough-diagram.now.sh/)
 
 Hand-drawn style diagramming tool based on [shaky][1] by Vyacheslav Egorov.
 
